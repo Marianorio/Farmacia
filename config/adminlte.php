@@ -322,7 +322,7 @@ return [
         ],
         [
             'text' => 'Inicio',
-            'url' => '/inicio',
+            'url' => '/home',
             'icon' => 'far fa-fw fa-folder',
             /*
             'label' => 4,
