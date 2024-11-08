@@ -3,11 +3,11 @@
 @section('title', 'Dashboard')
 
 @section('content_header')
-    <h1>Vista de Ventas</h1>
+    <h1>Vista de Informacion Guia</h1>
 @stop
 
 @section('content')
-    <p>Ventas</p>
+    <p>Primeros Pasos</p>
 @stop
 
 @section('css')

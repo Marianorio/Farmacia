@@ -394,9 +394,9 @@ return [
             'url' => '/reportes',
         ],
         [
-            'text' => 'information',
+            'text' => 'Informacion',
             'icon_color' => 'cyan',
-            'url' => '#',
+            'url' => '/info',
         ],
     ],
 
