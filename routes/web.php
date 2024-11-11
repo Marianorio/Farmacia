@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 /*-------------------------- INICIO --------------------------*/
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 });
 
 Auth::routes();
@@ -22,7 +22,7 @@ Route::get('/vista_admin', function () {
     return view('vista_admin');
 })->name('vista_admin');
 
-Route::get('/productos', function () {
+/*Route::get('/productos', function () {
     return view('productos.productos');
 })->name('productos');
 
@@ -58,3 +58,8 @@ Route::get('/info', function () {
 /*
 Route::get('/productos', [App\Http\Controllers\ProductoController::class, 'productos'])->name('productos');
 */
+
+use App\Http\Controllers\ProductoController;
+
+Route::resource('productos', ProductoController::class);
+
