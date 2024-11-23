@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 /*-------------------------- INICIO --------------------------*/
 
 Route::get('/', function () {
-    return view('home');
+    return view('welcome');
 });
 
 Auth::routes();
@@ -25,7 +25,7 @@ Route::get('/vista_admin', function () {
 /*Route::get('/productos', function () {
     return view('productos.productos');
 })->name('productos');
-
+*/
 Route::get('/recetas', function () {
     return view('recetas.recetas');
 })->name('recetas');
@@ -62,4 +62,24 @@ Route::get('/productos', [App\Http\Controllers\ProductoController::class, 'produ
 use App\Http\Controllers\ProductoController;
 
 Route::resource('productos', ProductoController::class);
+
+/*------------------ Usuario Sesion Vista ------------------*/ 
+
+use App\Http\Controllers\UserController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [UserController::class, 'index'])->name('user.profile');
+    Route::post('/profile', [UserController::class, 'update'])->name('user.update');
+});
+
+/*------------------ Vista Admin ------------------*/ 
+
+use App\Http\Controllers\VistaAdminController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/vista_admin', [VistaAdminController::class, 'index'])->name('vista_admin');
+    Route::get('/vista_admin/{id}/edit', [VistaAdminController::class, 'edit'])->name('admin_user.edit');
+    Route::post('/vista_admin/{id}', [VistaAdminController::class, 'update'])->name('admin_user.update');
+    Route::delete('/vista_admin/{id}', [VistaAdminController::class, 'destroy'])->name('admin_user.destroy');
+});
 

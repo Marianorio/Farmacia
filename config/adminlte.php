@@ -332,7 +332,7 @@ return [
         ['header' => 'ADMINISTRACION'],
         [
             'text' => 'Perfil',
-            'url' => '/perfil',
+            'url' => '/profile',
             'icon' => 'fas fa-fw fa-user',
         ],
         [
@@ -361,7 +361,7 @@ return [
             'icon' => 'fas fa-fw fa-truck',
         ],
         [
-            'text' => 'Ventas',
+            'text' => 'Caja',
             'url' => '/ventas',
             'icon' => 'fas fa-fw fa-shopping-cart',
 

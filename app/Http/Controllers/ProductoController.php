@@ -16,7 +16,7 @@ class ProductoController extends Controller
     public function index()
     {
         $productos = Producto::all(); // Obtener todos los productos de la base de datos
-        return view('productos.index', compact('productos'));
+        return view('productos.productos', compact('productos'));
     }
 
     // Método para mostrar el formulario de creación
