@@ -24,7 +24,6 @@
             <table class="table table-striped" id="tablaPrincipal">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Cliente</th>
                         <th>Fecha</th>
                         <th>Total</th>
@@ -35,7 +34,6 @@
                 <tbody>
                     @foreach($ventas as $venta)
                     <tr>
-                        <td>{{ $venta->id }}</td>
                         <td>{{ $venta->cliente->nombre }}</td>
                         <td>{{ $venta->fecha }}</td>
                         <td>${{ number_format($venta->total, 2) }}</td>
