@@ -23,7 +23,8 @@ class ObraSocial extends Model
     // Relación con productos a través de la tabla pivot
     public function productos()
     {
-        return $this->belongsToMany(Producto::class, 'productos_obras_sociales', 'id_obra_social', 'id_producto')
-                    ->withPivot('descuento');
+        return $this->belongsToMany(Producto::class, 'obra_social_producto')
+                    ->withPivot('porcentaje_cobertura')
+                    ->withTimestamps();
     }
 }

@@ -1,0 +1,19 @@
+.custom-swal-container {
+    font-size: 0.9rem;
+}
+
+.custom-swal-container table {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.custom-swal-container th,
+.custom-swal-container td {
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.custom-swal-container .text-muted {
+    color: #6c757d;
+    font-size: 0.85em;
+} 

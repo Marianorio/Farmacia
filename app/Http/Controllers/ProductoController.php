@@ -4,81 +4,120 @@ namespace App\Http\Controllers;
 
 use App\Models\Producto;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\DB;
 
 class ProductoController extends Controller
 {
-    public function __construct()
+    public function index(Request $request)
     {
-        $this->middleware('auth');
+        if ($request->ajax()) {
+            $productos = Producto::with('categoria')->select('productos.*');
+            return DataTables::of($productos)
+                ->addColumn('categoria.nombre', function($producto) {
+                    return $producto->categoria ? $producto->categoria->nombre : '';
+                })
+                ->make(true);
+        }
+        return view('productos.productos');
     }
 
-    // Método para mostrar todos los productos
-    public function index()
-    {
-        $productos = Producto::all(); // Obtener todos los productos de la base de datos
-        return view('productos.productos', compact('productos'));
-    }
-
-    // Método para mostrar el formulario de creación
-    public function create()
-    {
-        return view('productos.create');
-    }
-
-    // Método para almacenar un nuevo producto en la base de datos
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'nombre' => 'required|max:100',
-            'descripcion' => 'nullable|string',
-            'precio_compra' => 'required|numeric',
-            'precio_venta' => 'required|numeric',
-            'stock_inicial' => 'required|integer',
-            'stock_actual' => 'required|integer',
-            'stock_minimo' => 'required|integer',
-            'caducidad' => 'nullable|date',
-            'id_categoria' => 'nullable|integer',
-            'id_proveedor' => 'nullable|integer',
+        try {
+            DB::beginTransaction();
+
+            // Validar y crear el producto
+            $producto = Producto::create($request->except('coberturas'));
+
+            // Procesar coberturas
+            if ($request->has('coberturas')) {
+                $coberturas = json_decode($request->coberturas, true);
+                $coberturasData = [];
+                
+                foreach ($coberturas as $obraSocialId => $descuento) {
+                    $coberturasData[$obraSocialId] = ['descuento' => $descuento];
+                }
+                
+                $producto->obrasSociales()->attach($coberturasData);
+            }
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Producto guardado exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar el producto: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function show($id)
+    {
+        $producto = Producto::with(['categoria', 'obrasSociales'])->findOrFail($id);
+        return response()->json([
+            'success' => true,
+            'data' => $producto
         ]);
-
-        Producto::create($validatedData); // Crear el producto en la base de datos
-
-        return redirect()->route('productos.index')->with('success', 'Producto creado exitosamente');
     }
 
-    // Método para mostrar el formulario de edición
-    public function edit(Producto $producto)
+    public function update(Request $request, $id)
     {
-        return view('productos.edit', compact('producto'));
+        try {
+            DB::beginTransaction();
+
+            $producto = Producto::findOrFail($id);
+            $producto->update($request->except('coberturas'));
+
+            // Actualizar coberturas
+            if ($request->has('coberturas')) {
+                $coberturas = json_decode($request->coberturas, true);
+                $coberturasData = [];
+                
+                foreach ($coberturas as $obraSocialId => $descuento) {
+                    $coberturasData[$obraSocialId] = ['descuento' => $descuento];
+                }
+                
+                $producto->obrasSociales()->sync($coberturasData);
+            }
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Producto actualizado exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el producto: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    // Método para actualizar un producto existente
-    public function update(Request $request, Producto $producto)
+    public function destroy($id)
     {
-        $validatedData = $request->validate([
-            'nombre' => 'required|max:100',
-            'descripcion' => 'nullable|string',
-            'precio_compra' => 'required|numeric',
-            'precio_venta' => 'required|numeric',
-            'stock_inicial' => 'required|integer',
-            'stock_actual' => 'required|integer',
-            'stock_minimo' => 'required|integer',
-            'caducidad' => 'nullable|date',
-            'id_categoria' => 'nullable|integer',
-            'id_proveedor' => 'nullable|integer',
-        ]);
+        try {
+            $producto = Producto::findOrFail($id);
+            $producto->obrasSociales()->detach();
+            $producto->delete();
 
-        $producto->update($validatedData); // Actualizar el producto
-
-        return redirect()->route('productos.index')->with('success', 'Producto actualizado exitosamente');
-    }
-
-    // Método para eliminar un producto
-    public function destroy(Producto $producto)
-    {
-        $producto->delete(); // Eliminar el producto
-
-        return redirect()->route('productos.index')->with('success', 'Producto eliminado exitosamente');
+            return response()->json([
+                'success' => true,
+                'message' => 'Producto eliminado exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar el producto: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
 

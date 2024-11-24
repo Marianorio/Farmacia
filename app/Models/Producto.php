@@ -18,6 +18,17 @@ class Producto extends Model
 
     // Opcionalmente, si deseas formatear la fecha de caducidad
     protected $dates = ['caducidad'];
+
+    public function obrasSociales()
+    {
+        return $this->belongsToMany(ObraSocial::class, 'productos_obras_sociales', 'id_producto', 'id_obra_social')
+                    ->withPivot('descuento');
+    }
+
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class, 'id_categoria');
+    }
 }
 
 

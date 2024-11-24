@@ -12,32 +12,28 @@ class ObraSocialController extends Controller
 {
     public function index()
     {
+        return view('obras_sociales.obras_sociales');
+    }
+
+    public function getData()
+    {
         try {
-            if (request()->ajax()) {
-                $obras_sociales = ObraSocial::select([
-                    'id',
-                    'nombre',
-                    'cuit',
-                    DB::raw('DATE(fecha_convenio) as fecha_convenio'),
-                    'fecha_vencimiento_convenio'
-                ])->get();
-                
-                return response()->json([
-                    'data' => $obras_sociales
-                ]);
-            }
-            
-            return view('obras_sociales.obras_sociales');
+            $obras_sociales = ObraSocial::select([
+                'id',
+                'nombre',
+                'cuit',
+                'fecha_convenio',
+                'fecha_vencimiento_convenio'
+            ])->get();
+
+            return response()->json([
+                'data' => $obras_sociales
+            ]);
         } catch (\Exception $e) {
-            \Log::error('Error en ObraSocialController@index: ' . $e->getMessage());
-            
-            if (request()->ajax()) {
-                return response()->json([
-                    'error' => true,
-                    'message' => 'Error al cargar los datos: ' . $e->getMessage()
-                ], 500);
-            }
-            return back()->with('error', 'Error al cargar las obras sociales');
+            return response()->json([
+                'data' => [],
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -150,23 +146,53 @@ class ObraSocialController extends Controller
     public function getProductos($id)
     {
         try {
-            $obraSocial = ObraSocial::with(['productos' => function($query) {
-                $query->select('productos.*', 'productos_obras_sociales.descuento');
-            }])->findOrFail($id);
+            $productos = DB::table('productos')
+                ->join('productos_obras_sociales', 'productos.id', '=', 'productos_obras_sociales.id_producto')
+                ->where('productos_obras_sociales.id_obra_social', $id)
+                ->select([
+                    'productos.nombre',
+                    'productos.descripcion',
+                    'productos_obras_sociales.descuento'
+                ])
+                ->get();
 
             return response()->json([
                 'success' => true,
-                'obraSocial' => [
-                    'id' => $obraSocial->id,
-                    'nombre' => $obraSocial->nombre
-                ],
-                'data' => $obraSocial->productos
+                'data' => $productos
             ]);
+            
         } catch (\Exception $e) {
+            \Log::error('Error en getProductos: ' . $e->getMessage());
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Error al cargar los productos: ' . $e->getMessage()
+                'message' => 'Error al obtener los productos'
             ], 500);
         }
+    }
+
+    public function getObrasSocialesSelect()
+    {
+        try {
+            $obras_sociales = ObraSocial::select('id', 'nombre')->get();
+            \Log::info('Obras Sociales encontradas:', $obras_sociales->toArray());
+            return response()->json($obras_sociales);
+        } catch (\Exception $e) {
+            \Log::error('Error en ObraSocialController@getObrasSocialesSelect: ' . $e->getMessage());
+            return response()->json([
+                'error' => true,
+                'message' => 'Error al cargar las obras sociales: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function verificarCuit(Request $request)
+    {
+        $cuit = $request->input('cuit');
+        $existe = ObraSocial::where('cuit', $cuit)->exists();
+        
+        return response()->json([
+            'disponible' => !$existe
+        ]);
     }
 }
