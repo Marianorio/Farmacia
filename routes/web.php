@@ -38,10 +38,6 @@ Route::get('/proveedores', function () {
     return view('proveedores.proveedores');
 })->name('proveedores');
 
-Route::get('/ventas', function () {
-    return view('ventas.ventas');
-})->name('ventas');
-
 /*-------------------------- LABELS --------------------------*/
 
 Route::get('/roles', function () {
@@ -83,3 +79,15 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/vista_admin/{id}', [VistaAdminController::class, 'destroy'])->name('admin_user.destroy');
 });
 
+
+/*------------------ Vista Ventas ------------------*/ 
+
+use App\Http\Controllers\VentasController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/ventas', [VentasController::class, 'index'])->name('ventas.index');
+    Route::post('/ventas', [VentasController::class, 'store'])->name('ventas.store');
+    Route::get('/ventas/{id}', [VentasController::class, 'show'])->name('ventas.show');
+    Route::delete('/ventas/{id}', [VentasController::class, 'destroy'])->name('ventas.destroy');
+    Route::get('/ventas/{id}/pdf', [VentasController::class, 'generarPDF'])->name('ventas.pdf');
+});

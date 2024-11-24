@@ -18,6 +18,22 @@ class Producto extends Model
 
     // Opcionalmente, si deseas formatear la fecha de caducidad
     protected $dates = ['caducidad'];
+
+    // Agreguemos las relaciones necesarias para las ventas
+    public function detalleVentas()
+    {
+        return $this->hasMany(DetalleVenta::class);
+    }
+
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class, 'id_categoria');
+    }
+
+    public function proveedor()
+    {
+        return $this->belongsTo(Proveedor::class, 'id_proveedor');
+    }
 }
 
 
