@@ -66,6 +66,12 @@
                                         <option value="">Seleccione una categoría</option>
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label for="id_proveedor">Proveedor</label>
+                                    <select class="form-control select2" id="id_proveedor" name="id_proveedor" required>
+                                        <option value="">Seleccione un proveedor</option>
+                                    </select>
+                                </div>
                             </div>
                             
                             <!-- Precios -->

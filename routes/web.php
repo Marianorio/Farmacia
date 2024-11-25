@@ -34,6 +34,8 @@ Route::get('/obras_sociales', function () {
     return view('obras_sociales.obras_sociales');
 })->name('obras_sociales');
 
+/*-------------------------- proveedores --------------------------*/
+
 Route::get('/proveedores', function () {
     return view('proveedores.proveedores');
 })->name('proveedores');
@@ -106,4 +108,12 @@ Route::get('/categorias', [CategoriaController::class, 'index']);
 Route::get('/obras-sociales', function() {
     return App\Models\ObraSocial::all();
 });
+
+use App\Http\Controllers\ProveedorController;
+
+Route::resource('proveedores', ProveedorController::class);
+
+Route::get('/proveedores/list', [ProveedorController::class, 'getProveedores']);
+
+Route::get('proveedores/{id}/productos', [ProveedorController::class, 'getProductos']);
 

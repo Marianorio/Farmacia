@@ -26,6 +26,32 @@ function cargarObrasSociales() {
     });
 }
 
+function cargarProveedores() {
+    $.ajax({
+        url: '/proveedores',
+        type: 'GET',
+        success: function(response) {
+            console.log('Proveedores cargados:', response); // Para debug
+            let options = '<option value="">Seleccione un proveedor</option>';
+            response.forEach(function(proveedor) {
+                options += `<option value="${proveedor.id}">${proveedor.nombre}</option>`;
+            });
+            $('#id_proveedor').html(options);
+            
+            // Inicializar Select2 para el select de proveedores
+            $('#id_proveedor').select2({
+                theme: 'bootstrap4',
+                width: '100%',
+                placeholder: 'Seleccione un proveedor'
+            });
+        },
+        error: function(xhr) {
+            console.error('Error al cargar proveedores:', xhr);
+            Swal.fire('Error', 'No se pudieron cargar los proveedores', 'error');
+        }
+    });
+}
+
 function nuevoProducto() {
     // Limpiar formulario
     $('#formProducto')[0].reset();
@@ -40,6 +66,7 @@ function nuevoProducto() {
     // Cargar datos necesarios
     cargarCategorias();
     cargarObrasSociales();
+    cargarProveedores();
     
     // Mostrar el modal
     $('#modalProducto').modal('show');
@@ -338,6 +365,7 @@ $(document).on('click', '.editar-producto', function() {
     // Cargar datos necesarios
     cargarCategorias();
     cargarObrasSociales();
+    cargarProveedores();
     
     // Obtener datos del producto
     $.get(`/productos/${id}`, function(response) {
@@ -354,6 +382,7 @@ $(document).on('click', '.editar-producto', function() {
         $('#stock_minimo').val(producto.stock_minimo);
         $('#caducidad').val(producto.caducidad);
         $('#id_categoria').val(producto.id_categoria).trigger('change');
+        $('#id_proveedor').val(producto.id_proveedor).trigger('change');
         
         // Cargar coberturas existentes
         if (producto.obras_sociales && producto.obras_sociales.length > 0) {

@@ -12,10 +12,13 @@ class ProductoController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $productos = Producto::with('categoria')->select('productos.*');
+            $productos = Producto::with(['categoria', 'proveedor'])->select('productos.*');
             return DataTables::of($productos)
                 ->addColumn('categoria.nombre', function($producto) {
                     return $producto->categoria ? $producto->categoria->nombre : '';
+                })
+                ->addColumn('proveedor.nombre', function($producto) {
+                    return $producto->proveedor ? $producto->proveedor->nombre : '';
                 })
                 ->make(true);
         }
@@ -59,7 +62,7 @@ class ProductoController extends Controller
 
     public function show($id)
     {
-        $producto = Producto::with(['categoria', 'obrasSociales'])->findOrFail($id);
+        $producto = Producto::with(['categoria', 'obrasSociales', 'proveedor'])->findOrFail($id);
         return response()->json([
             'success' => true,
             'data' => $producto
