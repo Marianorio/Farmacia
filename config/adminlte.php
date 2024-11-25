@@ -325,26 +325,26 @@ return [
             'text' => 'Inicio',
             'url' => '/home',
             'icon' => 'far fa-fw fa-folder',
-            /*
-            'label' => 4,
-            'label_color' => 'success',
-            */
+            'can' => 'home',
         ],
         ['header' => 'ADMINISTRACION'],
         [
             'text' => 'Perfil',
-            'url' => '/profile',
+            'url' => '/perfil',
             'icon' => 'fas fa-fw fa-user',
+            'can' => 'perfil',
         ],
         [
             'text' => 'Vista Admin',
             'url' => '/vista_admin',
             'icon' => 'fas fa-fw fa-lock',
+            'can' => 'vista_admin',
         ],
         [
             'text' => 'Productos',
             'url' => '/productos',
             'icon' => 'fas fa-fw fa-table',
+            'can' => 'productos.ver',
         ],
         [
             'text' => 'Recetas Medicas',

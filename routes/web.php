@@ -12,52 +12,55 @@ Auth::routes();
 
 /*-------------------------- VISTAS --------------------------*/
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])
+        ->name('home')
+        ->middleware('permission:home');
 
-Route::get('/perfil', function () {
-    return view('perfil');
-})->name('perfil');
+    Route::get('/perfil', [App\Http\Controllers\UserController::class, 'index'])
+        ->name('perfil')
+        ->middleware('permission:perfil');
 
-Route::get('/vista_admin', function () {
-    return view('vista_admin');
-})->name('vista_admin');
+    Route::get('/vista_admin', [App\Http\Controllers\VistaAdminController::class, 'index'])
+        ->name('vista_admin')
+        ->middleware('permission:vista_admin');
 
-/*Route::get('/productos', function () {
-    return view('productos.productos');
-})->name('productos');
-*/
-Route::get('/recetas', function () {
-    return view('recetas.recetas');
-})->name('recetas');
+    Route::get('/productos', [App\Http\Controllers\ProductoController::class, 'index'])
+        ->name('productos')
+        ->middleware('permission:productos.ver');
 
-Route::get('/obras_sociales', function () {
-    return view('obras_sociales.obras_sociales');
-})->name('obras_sociales');
+    Route::resource('productos', App\Http\Controllers\ProductoController::class)
+        ->except(['index'])
+        ->middleware('permission:productos.gestionar');
 
-Route::get('/proveedores', function () {
-    return view('proveedores.proveedores');
-})->name('proveedores');
+    Route::get('/recetas', [App\Http\Controllers\RecetasController::class, 'index'])
+        ->name('recetas')
+        ->middleware('permission:recetas');
 
-/*-------------------------- LABELS --------------------------*/
+    Route::get('/obras_sociales', [App\Http\Controllers\ObrasSocialesController::class, 'index'])
+        ->name('obras_sociales')
+        ->middleware('permission:obras_sociales');
 
-Route::get('/roles', function () {
-    return view('roles.roles');
-})->name('roles');
+    Route::get('/proveedores', [App\Http\Controllers\ProveedoresController::class, 'index'])
+        ->name('proveedores')
+        ->middleware('permission:proveedores');
 
-Route::get('/reportes', function () {
-    return view('reportes.reportes');
-})->name('reportes');
+    Route::get('/ventas', [App\Http\Controllers\VentasController::class, 'index'])
+        ->name('ventas')
+        ->middleware('permission:ventas');
 
-Route::get('/info', function () {
-    return view('info.info');
-})->name('info');
-/*
-Route::get('/productos', [App\Http\Controllers\ProductoController::class, 'productos'])->name('productos');
-*/
+    Route::get('/roles', [App\Http\Controllers\RolesController::class, 'index'])
+        ->name('roles')
+        ->middleware('permission:roles');
 
-use App\Http\Controllers\ProductoController;
+    Route::get('/reportes', [App\Http\Controllers\ReportesController::class, 'index'])
+        ->name('reportes')
+        ->middleware('permission:reportes');
 
-Route::resource('productos', ProductoController::class);
+    Route::get('/info', [App\Http\Controllers\InfoController::class, 'index'])
+        ->name('info')
+        ->middleware('permission:info');
+});
 
 /*------------------ Usuario Sesion Vista ------------------*/ 
 
