@@ -10,6 +10,7 @@ class ProductoController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        $this->middleware('can:productos');
     }
 
     // Método para mostrar todos los productos
@@ -43,7 +44,7 @@ class ProductoController extends Controller
 
         Producto::create($validatedData); // Crear el producto en la base de datos
 
-        return redirect()->route('productos.index')->with('success', 'Producto creado exitosamente');
+        return redirect()->route('productos')->with('success', 'Producto creado exitosamente');
     }
 
     // Método para mostrar el formulario de edición
@@ -70,7 +71,7 @@ class ProductoController extends Controller
 
         $producto->update($validatedData); // Actualizar el producto
 
-        return redirect()->route('productos.index')->with('success', 'Producto actualizado exitosamente');
+        return redirect()->route('productos')->with('success', 'Producto actualizado exitosamente');
     }
 
     // Método para eliminar un producto
@@ -78,7 +79,7 @@ class ProductoController extends Controller
     {
         $producto->delete(); // Eliminar el producto
 
-        return redirect()->route('productos.index')->with('success', 'Producto eliminado exitosamente');
+        return redirect()->route('productos')->with('success', 'Producto eliminado exitosamente');
     }
 }
 

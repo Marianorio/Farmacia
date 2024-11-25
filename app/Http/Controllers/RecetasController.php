@@ -6,23 +6,14 @@ use Illuminate\Http\Request;
 
 class RecetasController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    
-     public function __construct()
-     {
-         $this->middleware('auth');
-     }
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
-    public function recetas()
+    public function __construct()
     {
-        return view('/recetas');
+        $this->middleware('auth');
+        $this->middleware('can:recetas');
+    }
+
+    public function index()
+    {
+        return view('recetas.recetas');
     }
 }

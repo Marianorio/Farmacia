@@ -6,23 +6,14 @@ use Illuminate\Http\Request;
 
 class ProveedoresController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    
-     public function __construct()
-     {
-         $this->middleware('auth');
-     }
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
-    public function proveedores()
+    public function __construct()
     {
-        return view('/proveedores');
+        $this->middleware('auth');
+        $this->middleware('can:proveedores');
+    }
+
+    public function index()
+    {
+        return view('proveedores.proveedores');
     }
 }

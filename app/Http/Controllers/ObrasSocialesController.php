@@ -6,23 +6,14 @@ use Illuminate\Http\Request;
 
 class ObrasSocialesController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    
-     public function __construct()
-     {
-         $this->middleware('auth');
-     }
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
-    public function obras_sociales()
+    public function __construct()
     {
-        return view('/obras_sociales');
+        $this->middleware('auth');
+        $this->middleware('can:obras_sociales');
+    }
+
+    public function index()
+    {
+        return view('obras_sociales.obras_sociales');
     }
 }

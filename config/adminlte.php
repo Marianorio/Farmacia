@@ -344,27 +344,31 @@ return [
             'text' => 'Productos',
             'url' => '/productos',
             'icon' => 'fas fa-fw fa-table',
-            'can' => 'productos.ver',
+            'can' => 'productos',
         ],
         [
             'text' => 'Recetas Medicas',
             'url' => '/recetas',
             'icon' => 'fas fa-fw fa-edit',
+            'can' => 'recetas',
         ],
         [
             'text' => 'Obras Sociales',
             'url' => '/obras_sociales',
             'icon' => 'fas fa-fw fa-book',
+            'can' => 'obras_sociales',
         ],
         [
             'text' => 'Proveedores',
             'url' => '/proveedores',
             'icon' => 'fas fa-fw fa-truck',
+            'can' => 'proveedores',
         ],
         [
             'text' => 'Caja',
             'url' => '/ventas',
             'icon' => 'fas fa-fw fa-shopping-cart',
+            'can' => 'ventas',
 
             /*'submenu' => [
                 [
@@ -388,16 +392,19 @@ return [
             'text' => 'Roles y Permisos',
             'icon_color' => 'red',
             'url' => '/roles',
+            'can' => 'roles',
         ],
         [
             'text' => 'Reportes',
             'icon_color' => 'yellow',
             'url' => '/reportes',
+            'can' => 'reportes',
         ],
         [
             'text' => 'Informacion',
             'icon_color' => 'cyan',
             'url' => '/info',
+            'can' => 'info',
         ],
     ],
 

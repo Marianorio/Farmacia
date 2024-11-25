@@ -6,23 +6,14 @@ use Illuminate\Http\Request;
 
 class InfoController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    
-     public function __construct()
-     {
-         $this->middleware('auth');
-     }
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
-    public function info()
+    public function __construct()
     {
-        return view('/info');
+        $this->middleware('auth');
+        $this->middleware('can:info');
+    }
+
+    public function index()
+    {
+        return view('info.info');
     }
 }

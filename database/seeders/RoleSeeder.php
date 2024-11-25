@@ -20,8 +20,7 @@ class RoleSeeder extends Seeder
         Permission::create(['name' => 'home']);
         Permission::create(['name' => 'perfil']);
         Permission::create(['name' => 'vista_admin']);
-        Permission::create(['name' => 'productos.ver']);
-        Permission::create(['name' => 'productos.gestionar']);
+        Permission::create(['name' => 'productos']);
         Permission::create(['name' => 'recetas']);
         Permission::create(['name' => 'obras_sociales']);
         Permission::create(['name' => 'proveedores']);
@@ -30,25 +29,26 @@ class RoleSeeder extends Seeder
         Permission::create(['name' => 'reportes']);
         Permission::create(['name' => 'info']);
 
-        // Titular: acceso total
-        $rolTitular->givePermissionTo(Permission::all());
+        // Asignar permisos al Titular (todos)
+        $permisos = Permission::all();
+        $rolTitular->syncPermissions($permisos);
 
         // Adjunto: todo excepto vista_admin y roles
         $rolAdjunto->givePermissionTo([
-            'home', 'perfil', 'productos.ver', 'productos.gestionar',
-            'recetas', 'obras_sociales', 'proveedores', 'ventas',
-            'reportes', 'info'
+            'home', 'perfil', 'productos',
+            'recetas', 'obras_sociales', 'proveedores', 
+            'ventas', 'reportes', 'info'
         ]);
 
         // Técnico: acceso limitado
         $rolTecnico->givePermissionTo([
-            'home', 'perfil', 'productos.ver', 'productos.gestionar',
+            'home', 'perfil', 'productos',
             'proveedores', 'ventas', 'info'
         ]);
 
-        // Auxiliar: acceso muy limitado
+        // Auxiliar: acceso muy limitado (ya no tiene acceso a productos)
         $rolAuxiliar->givePermissionTo([
-            'home', 'perfil', 'productos.ver', 'ventas', 'info'
+            'home', 'perfil', 'ventas', 'info'
         ]);
     }
 }

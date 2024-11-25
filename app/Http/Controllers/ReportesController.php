@@ -6,23 +6,14 @@ use Illuminate\Http\Request;
 
 class ReportesController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    
-     public function __construct()
-     {
-         $this->middleware('auth');
-     }
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
-    public function reportes()
+    public function __construct()
     {
-        return view('/reportes');
+        $this->middleware('auth');
+        $this->middleware('can:reportes');
+    }
+
+    public function index()
+    {
+        return view('reportes.reportes');
     }
 }
