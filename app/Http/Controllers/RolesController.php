@@ -21,8 +21,8 @@ class RolesController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function roles()
+    public function index()
     {
-        return view('/roles');
+        return view('roles');
     }
 }
