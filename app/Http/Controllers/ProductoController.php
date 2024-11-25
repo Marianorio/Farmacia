@@ -28,6 +28,10 @@ class ProductoController extends Controller
     // Método para almacenar un nuevo producto en la base de datos
     public function store(Request $request)
     {
+        if (!auth()->user()->hasAnyRole(['Titular', 'Adjunto', 'Tecnico'])) {
+            abort(403, 'No tienes permiso para realizar esta acción.');
+        }
+
         $validatedData = $request->validate([
             'nombre' => 'required|max:100',
             'descripcion' => 'nullable|string',
@@ -55,6 +59,10 @@ class ProductoController extends Controller
     // Método para actualizar un producto existente
     public function update(Request $request, Producto $producto)
     {
+        if (!auth()->user()->hasAnyRole(['Titular', 'Adjunto', 'Tecnico'])) {
+            abort(403, 'No tienes permiso para realizar esta acción.');
+        }
+
         $validatedData = $request->validate([
             'nombre' => 'required|max:100',
             'descripcion' => 'nullable|string',
@@ -76,6 +84,10 @@ class ProductoController extends Controller
     // Método para eliminar un producto
     public function destroy(Producto $producto)
     {
+        if (!auth()->user()->hasAnyRole(['Titular', 'Adjunto', 'Tecnico'])) {
+            abort(403, 'No tienes permiso para realizar esta acción.');
+        }
+
         $producto->delete(); // Eliminar el producto
 
         return redirect()->route('productos.index')->with('success', 'Producto eliminado exitosamente');

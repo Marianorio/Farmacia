@@ -300,104 +300,63 @@ return [
     */
 
     'menu' => [
-        // Navbar items:
-        [
-            'type' => 'navbar-search',
-            'text' => 'search',
-            'topnav_right' => true,
-        ],
-        [
-            'type' => 'fullscreen-widget',
-            'topnav_right' => true,
-        ],
-
-        // Sidebar items:
-        [
-            'type' => 'sidebar-menu-search',
-            'text' => 'buscar...',
-        ],
-        [
-            'text' => 'blog',
-            'url' => 'admin/blog',
-            'can' => 'manage-blog',
-        ],
         [
             'text' => 'Inicio',
-            'url' => '/home',
-            'icon' => 'far fa-fw fa-folder',
-            /*
-            'label' => 4,
-            'label_color' => 'success',
-            */
-        ],
-        ['header' => 'ADMINISTRACION'],
-        [
-            'text' => 'Perfil',
-            'url' => '/profile',
-            'icon' => 'fas fa-fw fa-user',
+            'url'  => 'home',
+            'icon' => 'fas fa-fw fa-home',
         ],
         [
-            'text' => 'Vista Admin',
-            'url' => '/vista_admin',
-            'icon' => 'fas fa-fw fa-lock',
+            'text' => 'Gestión de Usuarios',
+            'url'  => 'vista_admin',
+            'icon' => 'fas fa-fw fa-users-cog',
+            'can'  => 'ver-admin',
         ],
-        [
-            'text' => 'Productos',
-            'url' => '/productos',
-            'icon' => 'fas fa-fw fa-table',
-        ],
-        [
-            'text' => 'Recetas Medicas',
-            'url' => '/recetas',
-            'icon' => 'fas fa-fw fa-edit',
-        ],
-        [
-            'text' => 'Obras Sociales',
-            'url' => '/obras_sociales',
-            'icon' => 'fas fa-fw fa-book',
-        ],
-        [
-            'text' => 'Proveedores',
-            'url' => '/proveedores',
-            'icon' => 'fas fa-fw fa-truck',
-        ],
-        [
-            'text' => 'Caja',
-            'url' => '/ventas',
-            'icon' => 'fas fa-fw fa-shopping-cart',
-
-            /*'submenu' => [
-                [
-                    'text' => 'level_one',
-                    'url' => '#',
-                ],
-                [
-                    'text' => 'level_one',
-                    'url' => '#',
-                ],
-                [
-                    'text' => 'level_one',
-                    'url' => '#',
-                ],
-            
-            ],
-            */
-        ],
-        ['header' => 'labels'],
         [
             'text' => 'Roles y Permisos',
-            'icon_color' => 'red',
-            'url' => '/roles',
+            'url'  => 'roles',
+            'icon' => 'fas fa-fw fa-user-shield',
+            'can'  => 'ver-admin',
         ],
         [
             'text' => 'Reportes',
-            'icon_color' => 'yellow',
-            'url' => '/reportes',
+            'url'  => 'reportes',
+            'icon' => 'fas fa-fw fa-chart-bar',
+            'can'  => 'ver-reportes',
         ],
         [
-            'text' => 'Informacion',
-            'icon_color' => 'cyan',
-            'url' => '/info',
+            'text' => 'Recetas',
+            'url'  => 'recetas',
+            'icon' => 'fas fa-fw fa-prescription',
+            'can'  => 'ver-recetas',
+        ],
+        [
+            'text' => 'Obras Sociales',
+            'url'  => 'obras_sociales',
+            'icon' => 'fas fa-fw fa-hospital',
+            'can'  => 'ver-obras-sociales',
+        ],
+        [
+            'text' => 'Proveedores',
+            'url'  => 'proveedores',
+            'icon' => 'fas fa-fw fa-truck',
+            'can'  => 'ver-proveedores',
+        ],
+        [
+            'text'    => 'Productos',
+            'icon'    => 'fas fa-fw fa-box',
+            'submenu' => [
+                [
+                    'text' => 'Ver Productos',
+                    'url'  => 'productos',
+                    'icon' => 'fas fa-fw fa-eye',
+                ],
+                [
+                    'text' => 'Gestionar Productos',
+                    'url'  => 'productos/create',
+                    'icon' => 'fas fa-fw fa-plus',
+                    'can'  => 'gestionar-productos',
+                ],
+            ],
         ],
     ],
 

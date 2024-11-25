@@ -39,17 +39,24 @@
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
                         <td>
-                            @if($user->hasRole('Titular'))
-                                <span class="badge badge-primary">Titular</span>
-                            @elseif($user->hasRole('Adjunto'))
-                                <span class="badge badge-success">Adjunto</span>
-                            @elseif($user->hasRole('Tecnico'))
-                                <span class="badge badge-info">Técnico</span>
-                            @elseif($user->hasRole('Auxiliar'))
-                                <span class="badge badge-warning">Auxiliar</span>
-                            @else
-                                <span class="badge badge-secondary">Sin rol</span>
-                            @endif
+                            @foreach($user->getRoleNames() as $role)
+                                @switch($role)
+                                    @case('Titular')
+                                        <span class="badge badge-primary">Titular</span>
+                                        @break
+                                    @case('Adjunto')
+                                        <span class="badge badge-success">Adjunto</span>
+                                        @break
+                                    @case('Tecnico')
+                                        <span class="badge badge-info">Técnico</span>
+                                        @break
+                                    @case('Auxiliar')
+                                        <span class="badge badge-warning">Auxiliar</span>
+                                        @break
+                                    @default
+                                        <span class="badge badge-secondary">Sin rol</span>
+                                @endswitch
+                            @endforeach
                         </td>
                         <td>
                             <button class="btn btn-info btn-sm" onclick="editarUsuario({{ $user->id }})">
