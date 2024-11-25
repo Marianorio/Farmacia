@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title', 'Dashboard')
+@section('title', 'Roles y Permisos')
 
 @section('content_header')
     <h1>Vista de Roles y Permisos</h1>

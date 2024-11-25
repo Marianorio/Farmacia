@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Producto;
+use App\Models\Categoria;
+use App\Models\Proveedor;
+use App\Models\ObraSocial;
 use Illuminate\Http\Request;
 
 class ProductoController extends Controller
@@ -13,73 +16,103 @@ class ProductoController extends Controller
         $this->middleware('can:productos');
     }
 
-    // Método para mostrar todos los productos
     public function index()
     {
-        $productos = Producto::all(); // Obtener todos los productos de la base de datos
-        return view('productos.productos', compact('productos'));
+        $productos = Producto::with(['categoria', 'proveedor', 'obrasSociales'])->get();
+        $categorias = Categoria::all();
+        $proveedores = Proveedor::all();
+        $obrasSociales = ObraSocial::all();
+        
+        return view('productos.productos', compact('productos', 'categorias', 'proveedores', 'obrasSociales'));
     }
 
-    // Método para mostrar el formulario de creación
-    public function create()
-    {
-        return view('productos.create');
-    }
-
-    // Método para almacenar un nuevo producto en la base de datos
     public function store(Request $request)
     {
         $validatedData = $request->validate([
             'nombre' => 'required|max:100',
             'descripcion' => 'nullable|string',
-            'precio_compra' => 'required|numeric',
-            'precio_venta' => 'required|numeric',
-            'stock_inicial' => 'required|integer',
-            'stock_actual' => 'required|integer',
-            'stock_minimo' => 'required|integer',
+            'precio_compra' => 'required|numeric|min:0',
+            'precio_venta' => 'required|numeric|min:0',
+            'stock_inicial' => 'required|integer|min:0',
+            'stock_actual' => 'required|integer|min:0',
+            'stock_minimo' => 'required|integer|min:0',
             'caducidad' => 'nullable|date',
-            'id_categoria' => 'nullable|integer',
-            'id_proveedor' => 'nullable|integer',
+            'id_categoria' => 'required|exists:categorias,id',
+            'id_proveedor' => 'required|exists:proveedores,id',
+            'obras_sociales' => 'array|nullable',
+            'obras_sociales.*.id' => 'exists:obras_sociales,id',
+            'obras_sociales.*.porcentaje_cobertura' => 'required|numeric|min:0|max:100'
         ]);
 
-        Producto::create($validatedData); // Crear el producto en la base de datos
+        try {
+            $producto = Producto::create($validatedData);
 
-        return redirect()->route('productos')->with('success', 'Producto creado exitosamente');
+            if (!empty($request->obras_sociales)) {
+                $obrasSocialesData = collect($request->obras_sociales)
+                    ->mapWithKeys(function ($item) {
+                        return [$item['id'] => ['porcentaje_cobertura' => $item['porcentaje_cobertura']]];
+                    });
+                $producto->obrasSociales()->sync($obrasSocialesData);
+            }
+
+            return response()->json(['success' => true, 'message' => 'Producto creado exitosamente']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error al crear el producto: ' . $e->getMessage()], 500);
+        }
     }
 
-    // Método para mostrar el formulario de edición
-    public function edit(Producto $producto)
+    public function show($id)
     {
-        return view('productos.edit', compact('producto'));
+        $producto = Producto::with(['categoria', 'proveedor', 'obrasSociales'])->findOrFail($id);
+        return response()->json($producto);
     }
 
-    // Método para actualizar un producto existente
-    public function update(Request $request, Producto $producto)
+    public function update(Request $request, $id)
     {
+        $producto = Producto::findOrFail($id);
+
         $validatedData = $request->validate([
             'nombre' => 'required|max:100',
             'descripcion' => 'nullable|string',
-            'precio_compra' => 'required|numeric',
-            'precio_venta' => 'required|numeric',
-            'stock_inicial' => 'required|integer',
-            'stock_actual' => 'required|integer',
-            'stock_minimo' => 'required|integer',
+            'precio_compra' => 'required|numeric|min:0',
+            'precio_venta' => 'required|numeric|min:0',
+            'stock_inicial' => 'required|integer|min:0',
+            'stock_actual' => 'required|integer|min:0',
+            'stock_minimo' => 'required|integer|min:0',
             'caducidad' => 'nullable|date',
-            'id_categoria' => 'nullable|integer',
-            'id_proveedor' => 'nullable|integer',
+            'id_categoria' => 'required|exists:categorias,id',
+            'id_proveedor' => 'required|exists:proveedores,id',
+            'obras_sociales' => 'array|nullable',
+            'obras_sociales.*.id' => 'exists:obras_sociales,id',
+            'obras_sociales.*.porcentaje_cobertura' => 'required|numeric|min:0|max:100'
         ]);
 
-        $producto->update($validatedData); // Actualizar el producto
+        try {
+            $producto->update($validatedData);
 
-        return redirect()->route('productos')->with('success', 'Producto actualizado exitosamente');
+            if ($request->has('obras_sociales')) {
+                $obrasSocialesData = collect($request->obras_sociales)
+                    ->mapWithKeys(function ($item) {
+                        return [$item['id'] => ['porcentaje_cobertura' => $item['porcentaje_cobertura']]];
+                    });
+                $producto->obrasSociales()->sync($obrasSocialesData);
+            }
+
+            return response()->json(['success' => true, 'message' => 'Producto actualizado exitosamente']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error al actualizar el producto'], 500);
+        }
     }
 
-    // Método para eliminar un producto
-    public function destroy(Producto $producto)
+    public function destroy($id)
     {
-        $producto->delete(); // Eliminar el producto
-
-        return redirect()->route('productos')->with('success', 'Producto eliminado exitosamente');
+        try {
+            $producto = Producto::findOrFail($id);
+            $producto->delete();
+            return response()->json(['success' => true, 'message' => 'Producto eliminado exitosamente']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error al eliminar el producto'], 500);
+        }
     }
 }
 

@@ -9,22 +9,33 @@ class Producto extends Model
 {
     use HasFactory;
 
-    // Campos que se pueden llenar masivamente
     protected $fillable = [
-        'nombre', 'descripcion', 'precio_compra', 'precio_venta', 
-        'stock_inicial', 'stock_actual', 'stock_minimo', 'caducidad', 
-        'id_categoria', 'id_proveedor'
+        'nombre', 
+        'descripcion', 
+        'precio_compra', 
+        'precio_venta', 
+        'stock_inicial', 
+        'stock_actual', 
+        'stock_minimo', 
+        'caducidad', 
+        'id_categoria', 
+        'id_proveedor'
     ];
 
-    // Opcionalmente, si deseas formatear la fecha de caducidad
     protected $dates = ['caducidad'];
 
-    // Agreguemos las relaciones necesarias para las ventas
-    public function detalleVentas()
+    // Mutador para asegurar que el precio se guarde con 2 decimales
+    public function setPrecioCompraAttribute($value)
     {
-        return $this->hasMany(DetalleVenta::class);
+        $this->attributes['precio_compra'] = round($value, 2);
     }
 
+    public function setPrecioVentaAttribute($value)
+    {
+        $this->attributes['precio_venta'] = round($value, 2);
+    }
+
+    // Relaciones
     public function categoria()
     {
         return $this->belongsTo(Categoria::class, 'id_categoria');
@@ -33,6 +44,18 @@ class Producto extends Model
     public function proveedor()
     {
         return $this->belongsTo(Proveedor::class, 'id_proveedor');
+    }
+
+    public function detalleVentas()
+    {
+        return $this->hasMany(DetalleVenta::class);
+    }
+
+    public function obrasSociales()
+    {
+        return $this->belongsToMany(ObraSocial::class, 'producto_obra_social')
+                    ->withPivot('porcentaje_cobertura')
+                    ->withTimestamps();
     }
 }
 

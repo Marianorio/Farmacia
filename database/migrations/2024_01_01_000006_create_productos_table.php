@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreignId('id_categoria')->nullable()->constrained('categorias');
             $table->foreignId('id_proveedor')->nullable()->constrained('proveedores');
             $table->timestamp('fecha_creacion')->useCurrent();
+            $table->timestamp('fecha_actualizacion')->useCurrentOnUpdate()->nullable();
         });
     }
 

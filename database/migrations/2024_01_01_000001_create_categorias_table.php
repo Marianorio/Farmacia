@@ -12,6 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 100);
             $table->text('descripcion')->nullable();
+            $table->timestamp('fecha_creacion')->useCurrent();
+            $table->timestamp('fecha_actualizacion')->useCurrentOnUpdate()->nullable();
         });
     }
 

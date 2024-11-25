@@ -11,8 +11,11 @@ return new class extends Migration
         Schema::create('obras_sociales', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 100);
+            $table->string('cuit', 15);
+            $table->date('fecha_convenio');
+            $table->date('fecha_vencimiento_convenio');
             $table->text('descripcion')->nullable();
-            $table->timestamp('fecha_creacion')->useCurrent();
+            $table->timestamps();
         });
     }
 
