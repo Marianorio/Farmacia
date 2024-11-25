@@ -10,7 +10,7 @@
     {{-- Botones de menú --}}
     <div class="row mb-4">
         <div class="col-md-4">
-            <a href="{{ route('productos.index') }}" class="btn btn-lg btn-primary btn-block">
+            <a href="{{ route('productos') }}" class="btn btn-lg btn-primary btn-block">
                 <i class="fas fa-box"></i> Productos
             </a>
         </div>

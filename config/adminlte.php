@@ -155,7 +155,7 @@ return [
 
     'layout_topnav' => null,
     'layout_boxed' => null,
-    'layout_fixed_sidebar' => null,
+    'layout_fixed_sidebar' => true,
     'layout_fixed_navbar' => null,
     'layout_fixed_footer' => null,
     'layout_dark_mode' => null,
@@ -300,104 +300,82 @@ return [
     */
 
     'menu' => [
-        // Navbar items:
         [
-            'type' => 'navbar-search',
-            'text' => 'search',
-            'topnav_right' => true,
+            'text' => 'Dashboard',
+            'url'  => 'home',
+            'icon' => 'fas fa-fw fa-home',
+            'classes' => 'nav-item',
+            'topnav' => false,
         ],
-        [
-            'type' => 'fullscreen-widget',
-            'topnav_right' => true,
-        ],
-
-        // Sidebar items:
-        [
-            'type' => 'sidebar-menu-search',
-            'text' => 'buscar...',
-        ],
-        [
-            'text' => 'blog',
-            'url' => 'admin/blog',
-            'can' => 'manage-blog',
-        ],
-        [
-            'text' => 'Inicio',
-            'url' => '/home',
-            'icon' => 'far fa-fw fa-folder',
-            /*
-            'label' => 4,
-            'label_color' => 'success',
-            */
-        ],
-        ['header' => 'ADMINISTRACION'],
         [
             'text' => 'Perfil',
-            'url' => '/profile',
+            'url'  => 'perfil',
             'icon' => 'fas fa-fw fa-user',
+            'classes' => 'nav-item',
+            'topnav' => false,
         ],
         [
-            'text' => 'Vista Admin',
-            'url' => '/vista_admin',
-            'icon' => 'fas fa-fw fa-lock',
+            'text' => 'Administración',
+            'url'  => 'vista_admin',
+            'icon' => 'fas fa-fw fa-users-cog',
+            'classes' => 'nav-item',
+            'topnav' => false,
         ],
         [
             'text' => 'Productos',
-            'url' => '/productos',
-            'icon' => 'fas fa-fw fa-table',
+            'url'  => 'productos',
+            'icon' => 'fas fa-fw fa-box',
+            'classes' => 'nav-item',
+            'topnav' => false,
         ],
         [
-            'text' => 'Recetas Medicas',
-            'url' => '/recetas',
-            'icon' => 'fas fa-fw fa-edit',
+            'text' => 'Recetas',
+            'url'  => 'recetas',
+            'icon' => 'fas fa-fw fa-prescription',
+            'classes' => 'nav-item',
+            'topnav' => false,
         ],
         [
             'text' => 'Obras Sociales',
-            'url' => '/obras_sociales',
-            'icon' => 'fas fa-fw fa-book',
+            'url'  => 'obras_sociales',
+            'icon' => 'fas fa-fw fa-hospital',
+            'classes' => 'nav-item',
+            'topnav' => false,
         ],
         [
             'text' => 'Proveedores',
-            'url' => '/proveedores',
+            'url'  => 'proveedores',
             'icon' => 'fas fa-fw fa-truck',
+            'classes' => 'nav-item',
+            'topnav' => false,
         ],
         [
-            'text' => 'Caja',
-            'url' => '/ventas',
+            'text' => 'Ventas',
+            'url'  => 'ventas',
             'icon' => 'fas fa-fw fa-shopping-cart',
-
-            /*'submenu' => [
-                [
-                    'text' => 'level_one',
-                    'url' => '#',
-                ],
-                [
-                    'text' => 'level_one',
-                    'url' => '#',
-                ],
-                [
-                    'text' => 'level_one',
-                    'url' => '#',
-                ],
-            
-            ],
-            */
+            'classes' => 'nav-item',
+            'topnav' => false,
         ],
-        ['header' => 'labels'],
         [
-            'text' => 'Roles y Permisos',
-            'icon_color' => 'red',
-            'url' => '/roles',
+            'text' => 'Roles',
+            'url'  => 'roles',
+            'icon' => 'fas fa-fw fa-user-tag',
+            'classes' => 'nav-item',
+            'topnav' => false,
         ],
         [
             'text' => 'Reportes',
-            'icon_color' => 'yellow',
-            'url' => '/reportes',
+            'url'  => 'reportes',
+            'icon' => 'fas fa-fw fa-chart-bar',
+            'classes' => 'nav-item',
+            'topnav' => false,
         ],
         [
-            'text' => 'Informacion',
-            'icon_color' => 'cyan',
-            'url' => '/info',
+            'text' => 'Información',
+            'url'  => 'info',
+            'icon' => 'fas fa-fw fa-info-circle',
+            'classes' => 'nav-item',
+            'topnav' => false,
         ],
     ],
 
