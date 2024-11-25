@@ -95,16 +95,21 @@ class VentasController extends Controller
     public function show($id)
     {
         try {
-            $venta = Venta::with(['cliente', 'detalles.producto'])->findOrFail($id);
+            $venta = Venta::with(['cliente', 'detalles.producto'])
+                ->findOrFail($id);
+
             return response()->json([
                 'success' => true,
                 'data' => $venta
             ]);
         } catch (\Exception $e) {
+            \Log::error('Error en VentasController@show: ' . $e->getMessage());
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Venta no encontrada'
-            ], 404);
+                'message' => 'Error al obtener la venta',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 

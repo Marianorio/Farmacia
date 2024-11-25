@@ -74,6 +74,7 @@ use App\Http\Controllers\VistaAdminController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/vista_admin', [VistaAdminController::class, 'index'])->name('vista_admin');
+    Route::post('/vista_admin', [VistaAdminController::class, 'store'])->name('admin_user.store');
     Route::get('/vista_admin/{id}/edit', [VistaAdminController::class, 'edit'])->name('admin_user.edit');
     Route::post('/vista_admin/{id}', [VistaAdminController::class, 'update'])->name('admin_user.update');
     Route::delete('/vista_admin/{id}', [VistaAdminController::class, 'destroy'])->name('admin_user.destroy');

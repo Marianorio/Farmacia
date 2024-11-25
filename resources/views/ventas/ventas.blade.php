@@ -3,6 +3,7 @@
 @section('title', 'Ventas')
 
 @section('content_header')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <h1>Gestión de Ventas</h1>
 @stop
 
@@ -133,9 +134,9 @@
                     <div id="detallesVenta"></div>
                 </div>
                 <div class="modal-footer">
-                    <a href="{{ route('ventas.pdf', ':id') }}" class="btn btn-secondary" target="_blank">
+                    <button type="button" class="btn btn-secondary" id="btnDescargarPDF">
                         <i class="fas fa-file-pdf"></i> Descargar PDF
-                    </a>
+                    </button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                 </div>
             </div>
@@ -152,6 +153,12 @@
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap4.min.js"></script>
     <script>
         $(document).ready(function() {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
             $('#tablaPrincipal').DataTable({
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json"
@@ -198,35 +205,77 @@
                 });
             });
 
-            // Ver venta
+            let ventaIdActual; // Variable para almacenar el ID de la venta actual
+
+            // Cuando se hace click en el botón "ver venta"
             $('.ver-venta').click(function() {
-                const id = $(this).data('id');
-                $.get(`/ventas/${id}`, function(venta) {
-                    let html = `
-                        <p><strong>Cliente:</strong> ${venta.cliente.nombre}</p>
-                        <p><strong>Fecha:</strong> ${venta.fecha}</p>
-                        <p><strong>Estado:</strong> ${venta.estado}</p>
-                        <h6>Productos:</h6>
-                        <ul>
-                    `;
-                    
-                    venta.detalles.forEach(detalle => {
-                        html += `
-                            <li>${detalle.producto.nombre} - 
-                                Cantidad: ${detalle.cantidad} - 
-                                Subtotal: $${detalle.subtotal}
-                            </li>
-                        `;
-                    });
-                    
-                    html += `</ul><p><strong>Total:</strong> $${venta.total}</p>`;
-                    
-                    $('#detallesVenta').html(html);
-                    $('#verVentaModal').find('.modal-footer a').attr('href', 
-                        $('#verVentaModal').find('.modal-footer a').attr('href').replace(':id', id)
-                    );
-                    $('#verVentaModal').modal('show');
+                ventaIdActual = $(this).data('id');
+                
+                // Mostrar loading
+                $('#detallesVenta').html('<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>');
+                
+                $.ajax({
+                    url: `/ventas/${ventaIdActual}`,
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            const venta = response.data;
+                            let html = `
+                                <div class="table-responsive">
+                                    <p><strong>Cliente:</strong> ${venta.cliente.nombre}</p>
+                                    <p><strong>Fecha:</strong> ${venta.fecha}</p>
+                                    <p><strong>Estado:</strong> ${venta.estado}</p>
+                                    <h6>Productos:</h6>
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Producto</th>
+                                                <th>Cantidad</th>
+                                                <th>Precio Unit.</th>
+                                                <th>Subtotal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>`;
+                            
+                            venta.detalles.forEach(detalle => {
+                                html += `
+                                    <tr>
+                                        <td>${detalle.producto.nombre}</td>
+                                        <td>${detalle.cantidad}</td>
+                                        <td>$${detalle.precio_unitario}</td>
+                                        <td>$${detalle.subtotal}</td>
+                                    </tr>`;
+                            });
+                            
+                            html += `
+                                </tbody>
+                            </table>
+                            <h5 class="text-right"><strong>Total:</strong> $${venta.total}</h5>
+                        </div>`;
+                            
+                            $('#detallesVenta').html(html);
+                            $('#verVentaModal').modal('show');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#detallesVenta').html(`
+                            <div class="alert alert-danger">
+                                Error al cargar los detalles de la venta. 
+                                Por favor, intente nuevamente.
+                            </div>
+                        `);
+                    }
                 });
+            });
+
+            // Evento click para el botón de PDF
+            $('#btnDescargarPDF').click(function(e) {
+                e.preventDefault();
+                if (ventaIdActual) {
+                    window.open(`/ventas/${ventaIdActual}/pdf`, '_blank');
+                } else {
+                    alert('Error: No se pudo identificar la venta');
+                }
             });
 
             // Eliminar venta
@@ -236,15 +285,15 @@
                     $.ajax({
                         url: `/ventas/${id}`,
                         method: 'DELETE',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
                         success: function(response) {
                             if(response.success) {
                                 location.reload();
                             } else {
                                 alert('Error al eliminar la venta');
                             }
+                        },
+                        error: function(xhr) {
+                            alert('Error al eliminar la venta: ' + xhr.responseText);
                         }
                     });
                 }
