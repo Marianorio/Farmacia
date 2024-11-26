@@ -28,36 +28,37 @@ class ProductoController extends Controller
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'nombre' => 'required|max:100',
-            'descripcion' => 'nullable|string',
-            'precio_compra' => 'required|numeric|min:0',
-            'precio_venta' => 'required|numeric|min:0',
-            'stock_inicial' => 'required|integer|min:0',
-            'stock_actual' => 'required|integer|min:0',
-            'stock_minimo' => 'required|integer|min:0',
-            'caducidad' => 'nullable|date',
-            'id_categoria' => 'required|exists:categorias,id',
-            'id_proveedor' => 'required|exists:proveedores,id',
-            'obras_sociales' => 'array|nullable',
-            'obras_sociales.*.id' => 'exists:obras_sociales,id',
-            'obras_sociales.*.porcentaje_cobertura' => 'required|numeric|min:0|max:100'
-        ]);
-
         try {
+            $validatedData = $request->validate([
+                'nombre' => 'required|max:100',
+                'descripcion' => 'nullable|string',
+                'precio_compra' => 'required|numeric|min:0',
+                'precio_venta' => 'required|numeric|min:0',
+                'stock_inicial' => 'required|integer|min:0',
+                'stock_actual' => 'required|integer|min:0',
+                'stock_minimo' => 'required|integer|min:0',
+                'caducidad' => 'nullable|date',
+                'id_categoria' => 'required|exists:categorias,id',
+                'id_proveedor' => 'required|exists:proveedores,id'
+            ]);
+
             $producto = Producto::create($validatedData);
 
-            if (!empty($request->obras_sociales)) {
-                $obrasSocialesData = collect($request->obras_sociales)
-                    ->mapWithKeys(function ($item) {
-                        return [$item['id'] => ['porcentaje_cobertura' => $item['porcentaje_cobertura']]];
-                    });
-                $producto->obrasSociales()->sync($obrasSocialesData);
+            if ($request->has('obras_sociales')) {
+                $obrasSociales = json_decode($request->obras_sociales, true);
+                if (is_array($obrasSociales)) {
+                    $obrasSocialesData = collect($obrasSociales)
+                        ->mapWithKeys(function ($item) {
+                            return [$item['id'] => ['porcentaje_cobertura' => $item['porcentaje_cobertura']]];
+                        });
+                    $producto->obrasSociales()->sync($obrasSocialesData);
+                }
             }
 
-            return response()->json(['success' => true, 'message' => 'Producto creado exitosamente']);
+            return response()->json(['success' => true, 'message' => 'Producto guardado correctamente']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error al crear el producto: ' . $e->getMessage()], 500);
+            \Log::error('Error al crear producto: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 

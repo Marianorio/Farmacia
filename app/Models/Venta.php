@@ -10,12 +10,13 @@ class Venta extends Model
     use HasFactory;
 
     protected $table = 'ventas';
+    public $timestamps = false;
 
     protected $fillable = [
-        'cliente_id',
+        'id_cliente',
         'fecha',
         'total',
-        'estado'
+        'id_empleado'
     ];
 
     // Convertir estos campos a fechas automáticamente
@@ -28,12 +29,18 @@ class Venta extends Model
     // Relación con cliente
     public function cliente()
     {
-        return $this->belongsTo(Cliente::class);
+        return $this->belongsTo(Cliente::class, 'id_cliente');
+    }
+
+    // Relación con empleado
+    public function empleado()
+    {
+        return $this->belongsTo(User::class, 'id_empleado');
     }
 
     // Relación con detalles de venta
     public function detalles()
     {
-        return $this->hasMany(DetalleVenta::class);
+        return $this->hasMany(DetalleVenta::class, 'venta_id');
     }
 }

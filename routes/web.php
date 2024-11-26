@@ -6,7 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\RecetasController;
 use App\Http\Controllers\ObrasSocialesController;
-use App\Http\Controllers\ProveedoresController;
+use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\VentasController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\ReportesController;
@@ -42,6 +42,20 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}/edit', [VistaAdminController::class, 'edit'])->name('admin_user.edit');
         Route::post('/{id}', [VistaAdminController::class, 'update'])->name('admin_user.update');
         Route::delete('/{id}', [VistaAdminController::class, 'destroy'])->name('admin_user.destroy');
+
+        Route::prefix('proveedores')->middleware('can:proveedores')->group(function () {
+            Route::get('/', [ProveedorController::class, 'index'])->name('proveedores');
+            Route::post('/', [ProveedorController::class, 'store'])->name('proveedores.store');
+            Route::get('/{id}/productos', [ProveedorController::class, 'getProductos'])->name('proveedores.productos');
+            Route::put('/{id}', [ProveedorController::class, 'update'])->name('proveedores.update');
+            Route::delete('/{id}', [ProveedorController::class, 'destroy'])->name('proveedores.destroy');
+        });
+
+        Route::get('ventas', [VentasController::class, 'index'])->name('ventas.index');
+        Route::post('ventas', [VentasController::class, 'store'])->name('ventas.store');
+        Route::get('ventas/{id}', [VentasController::class, 'show'])->name('ventas.show');
+        Route::delete('ventas/{id}', [VentasController::class, 'destroy'])->name('ventas.destroy');
+        Route::get('ventas/{id}/pdf', [VentasController::class, 'generarPDF'])->name('ventas.pdf');
     });
 
     // Productos
@@ -78,9 +92,13 @@ Route::middleware(['auth'])->group(function () {
     })->middleware('can:obras_sociales');
 
 
-    Route::get('/proveedores', [ProveedoresController::class, 'index'])
-        ->name('proveedores')
-        ->middleware('can:proveedores');
+    Route::prefix('proveedores')->middleware('can:proveedores')->group(function () {
+        Route::get('/', [ProveedorController::class, 'index'])->name('proveedores');
+        Route::post('/', [ProveedorController::class, 'store'])->name('proveedores.store');
+        Route::get('/{id}/productos', [ProveedorController::class, 'productos'])->name('proveedores.productos');
+        Route::put('/{id}', [ProveedorController::class, 'update'])->name('proveedores.update');
+        Route::delete('/{id}', [ProveedorController::class, 'destroy'])->name('proveedores.destroy');
+    });
 
     // Roles
     Route::get('/roles', [RolesController::class, 'index'])
@@ -96,4 +114,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/info', [InfoController::class, 'index'])
         ->name('info')
         ->middleware('can:info');
+
+    Route::get('/ventas/{venta}', [VentasController::class, 'show'])->name('ventas.show');
+    Route::get('/ventas/{venta}/pdf', [VentasController::class, 'generarPDF'])->name('ventas.pdf');
+    Route::delete('/ventas/{venta}', [VentasController::class, 'destroy'])->name('ventas.destroy');
 });

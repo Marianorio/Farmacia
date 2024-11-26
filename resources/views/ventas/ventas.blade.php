@@ -73,7 +73,7 @@
                     <form id="formNuevaVenta">
                         <div class="form-group">
                             <label>Cliente</label>
-                            <select class="form-control" name="cliente_id" required>
+                            <select class="form-control" name="id_cliente" required>
                                 <option value="">Seleccione un cliente</option>
                                 @foreach($clientes as $cliente)
                                     <option value="{{ $cliente->id }}">{{ $cliente->nombre }}</option>
@@ -99,7 +99,7 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Cantidad</label>
-                                            <input type="number" class="form-control cantidad-input" min="1" required>
+                                            <input type="number" class="form-control cantidad-input" min="1" value="1" required>
                                         </div>
                                     </div>
                                     <div class="col-md-2">
@@ -151,6 +151,7 @@
 @section('js')
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
             $.ajaxSetup({
@@ -168,65 +169,160 @@
             // Agregar producto
             $('.agregar-producto').click(function() {
                 const container = $('.productos-container');
-                const nuevoProducto = $('.producto-item:first').clone();
-                nuevoProducto.find('select, input').val('');
+                const nuevoProducto = `
+                    <div class="producto-item">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Producto</label>
+                                    <select class="form-control producto-select" required>
+                                        <option value="">Seleccione un producto</option>
+                                        @foreach($productos as $producto)
+                                            <option value="{{ $producto->id }}" data-precio="{{ $producto->precio_venta }}">
+                                                {{ $producto->nombre }} - ${{ $producto->precio_venta }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Cantidad</label>
+                                    <input type="number" class="form-control cantidad-input" min="1" value="1" required>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-danger mt-4 eliminar-producto">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
                 container.append(nuevoProducto);
+            });
+
+            // Eliminar producto
+            $(document).on('click', '.eliminar-producto', function() {
+                $(this).closest('.producto-item').remove();
             });
 
             // Guardar venta
             $('#guardarVenta').click(function() {
+                // Validar cliente
+                const clienteId = $('select[name="id_cliente"]').val();
+                if (!clienteId) {
+                    Swal.fire('Error', 'Debe seleccionar un cliente', 'error');
+                    return;
+                }
+
+                // Recolectar productos
                 const productos = [];
+                let isValid = true;
+
                 $('.producto-item').each(function() {
                     const productoId = $(this).find('.producto-select').val();
                     const cantidad = $(this).find('.cantidad-input').val();
-                    if(productoId && cantidad) {
-                        productos.push({
-                            id: productoId,
-                            cantidad: cantidad
-                        });
+                    
+                    if (!productoId || !cantidad) {
+                        isValid = false;
+                        return false;
+                    }
+
+                    productos.push({
+                        id: productoId,
+                        cantidad: parseInt(cantidad)
+                    });
+                });
+
+                if (!isValid) {
+                    Swal.fire('Error', 'Por favor complete todos los campos de productos', 'error');
+                    return;
+                }
+
+                if (productos.length === 0) {
+                    Swal.fire('Error', 'Debe agregar al menos un producto', 'error');
+                    return;
+                }
+
+                // Debug
+                console.log('Datos a enviar:', {
+                    id_cliente: clienteId,
+                    productos: productos
+                });
+
+                // Mostrar loading
+                Swal.fire({
+                    title: 'Guardando venta...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
                     }
                 });
 
+                // Enviar petición
                 $.ajax({
-                    url: '/ventas',
+                    url: "{{ route('ventas.store') }}",
                     method: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}',
-                        cliente_id: $('select[name="cliente_id"]').val(),
+                        id_cliente: clienteId,
                         productos: productos
                     },
                     success: function(response) {
+                        console.log('Respuesta del servidor:', response);
                         if(response.success) {
-                            location.reload();
+                            Swal.fire({
+                                title: '¡Éxito!',
+                                text: 'Venta guardada correctamente',
+                                icon: 'success'
+                            }).then(() => {
+                                location.reload();
+                            });
                         } else {
-                            alert('Error al guardar la venta');
+                            Swal.fire('Error', response.message || 'Error al guardar la venta', 'error');
                         }
+                    },
+                    error: function(xhr) {
+                        console.log('Error en la petición:', xhr);
+                        let errorMessage = 'Error al guardar la venta';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        Swal.fire('Error', errorMessage, 'error');
                     }
                 });
             });
 
             let ventaIdActual; // Variable para almacenar el ID de la venta actual
 
-            // Cuando se hace click en el botón "ver venta"
+            // Ver detalles de venta
             $('.ver-venta').click(function() {
                 ventaIdActual = $(this).data('id');
                 
-                // Mostrar loading
-                $('#detallesVenta').html('<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>');
+                Swal.fire({
+                    title: 'Cargando...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
                 
                 $.ajax({
                     url: `/ventas/${ventaIdActual}`,
                     method: 'GET',
                     success: function(response) {
+                        Swal.close();
+                        // Debug para ver qué datos llegan
+                        console.log('Respuesta del servidor:', response);
+                        
                         if (response.success) {
                             const venta = response.data;
                             let html = `
                                 <div class="table-responsive">
-                                    <p><strong>Cliente:</strong> ${venta.cliente.nombre}</p>
-                                    <p><strong>Fecha:</strong> ${venta.fecha}</p>
-                                    <p><strong>Estado:</strong> ${venta.estado}</p>
-                                    <h6>Productos:</h6>
-                                    <table class="table">
+                                    <p><strong>Cliente:</strong> ${venta.cliente ? venta.cliente.nombre : 'Cliente no disponible'}</p>
+                                    <p><strong>Fecha:</strong> ${venta.fecha || 'Fecha no disponible'}</p>
+                                    <table class="table table-striped">
                                         <thead>
                                             <tr>
                                                 <th>Producto</th>
@@ -237,33 +333,38 @@
                                         </thead>
                                         <tbody>`;
                             
-                            venta.detalles.forEach(detalle => {
+                            if (venta.detalles && venta.detalles.length > 0) {
+                                venta.detalles.forEach(detalle => {
+                                    html += `
+                                        <tr>
+                                            <td>${detalle.producto ? detalle.producto.nombre : 'Producto no disponible'}</td>
+                                            <td>${detalle.cantidad || 0}</td>
+                                            <td>$${detalle.precio_unitario ? parseFloat(detalle.precio_unitario).toFixed(2) : '0.00'}</td>
+                                            <td>$${detalle.subtotal ? parseFloat(detalle.subtotal).toFixed(2) : '0.00'}</td>
+                                        </tr>`;
+                                });
+                            } else {
                                 html += `
                                     <tr>
-                                        <td>${detalle.producto.nombre}</td>
-                                        <td>${detalle.cantidad}</td>
-                                        <td>$${detalle.precio_unitario}</td>
-                                        <td>$${detalle.subtotal}</td>
+                                        <td colspan="4" class="text-center">No hay detalles disponibles</td>
                                     </tr>`;
-                            });
+                            }
                             
                             html += `
                                 </tbody>
                             </table>
-                            <h5 class="text-right"><strong>Total:</strong> $${venta.total}</h5>
+                            <h5 class="text-right">
+                                <strong>Total:</strong> $${venta.total ? parseFloat(venta.total).toFixed(2) : '0.00'}
+                            </h5>
                         </div>`;
                             
                             $('#detallesVenta').html(html);
                             $('#verVentaModal').modal('show');
                         }
                     },
-                    error: function(xhr, status, error) {
-                        $('#detallesVenta').html(`
-                            <div class="alert alert-danger">
-                                Error al cargar los detalles de la venta. 
-                                Por favor, intente nuevamente.
-                            </div>
-                        `);
+                    error: function(xhr) {
+                        console.error('Error en la petición:', xhr);
+                        Swal.fire('Error', 'No se pudieron cargar los detalles de la venta', 'error');
                     }
                 });
             });

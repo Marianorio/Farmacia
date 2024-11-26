@@ -10,6 +10,7 @@ use Database\Seeders\UserSeeder;
 use Database\Seeders\CategoriasSeeder;
 use Database\Seeders\ObrasSocialesSeeder;
 use Database\Seeders\ProductosSeeder;
+use Database\Seeders\ClientesSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,6 +25,7 @@ class DatabaseSeeder extends Seeder
             CategoriasSeeder::class,
             ObrasSocialesSeeder::class,
             ProductosSeeder::class,
+            ClientesSeeder::class,
         ]);
     }
 }

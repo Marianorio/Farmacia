@@ -107,6 +107,15 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label for="id_proveedor">Proveedor <span class="text-danger">*</span></label>
+                                    <select class="form-control select2" id="id_proveedor" name="id_proveedor" required>
+                                        <option value="">Seleccione un proveedor</option>
+                                        @foreach($proveedores as $proveedor)
+                                            <option value="{{ $proveedor->id }}">{{ $proveedor->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                             
                             <!-- Precios -->
@@ -169,6 +178,9 @@
                                                     <label for="obra_social_id">Seleccionar Obra Social</label>
                                                     <select class="form-control" id="obra_social_id">
                                                         <option value="">Seleccione una obra social</option>
+                                                        @foreach($obrasSociales as $obraSocial)
+                                                            <option value="{{ $obraSocial->id }}">{{ $obraSocial->nombre }}</option>
+                                                        @endforeach
                                                     </select>
                                                 </div>
                                             </div>
@@ -443,6 +455,59 @@
                             </tr>
                         `);
                     });
+                });
+            });
+
+            // Manejar el envío del formulario
+            $('#formProducto').on('submit', function(e) {
+                e.preventDefault();
+                
+                let formData = new FormData(this);
+                
+                // Recolectar datos de obras sociales
+                let obrasSociales = [];
+                $('#tabla-coberturas tr').each(function() {
+                    obrasSociales.push({
+                        id: $(this).find('input[name="obras_sociales[][id]"]').val(),
+                        porcentaje_cobertura: $(this).find('input[name="obras_sociales[][porcentaje_cobertura]"]').val()
+                    });
+                });
+                
+                // Eliminar el campo anterior si existe
+                formData.delete('obras_sociales');
+                
+                // Agregar obras sociales como un array JSON
+                formData.append('obras_sociales', JSON.stringify(obrasSociales));
+
+                // Debug: Mostrar datos que se están enviando
+                for (var pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+
+                $.ajax({
+                    url: '/productos',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            $('#modalProducto').modal('hide');
+                            Swal.fire('¡Éxito!', 'Producto guardado correctamente', 'success')
+                            .then(() => {
+                                location.reload();
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        let errors = xhr.responseJSON.errors;
+                        let errorMessage = '';
+                        for (let field in errors) {
+                            errorMessage += `${errors[field].join('\n')}\n`;
+                        }
+                        Swal.fire('Error', errorMessage, 'error');
+                        console.log('Errores de validación:', errors); // Para debug
+                    }
                 });
             });
         });

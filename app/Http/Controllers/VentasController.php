@@ -8,12 +8,18 @@ use App\Models\Producto;
 use App\Models\DetalleVenta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use PDF;
 use Barryvdh\DomPDF\Facade\Pdf as DomPDF;
 use Illuminate\Support\Facades\View;
 
 class VentasController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
         $ventas = Venta::with('cliente')->orderBy('id', 'desc')->get();
@@ -30,25 +36,25 @@ class VentasController extends Controller
             
             // Validar la solicitud
             $request->validate([
-                'cliente_id' => 'required|exists:clientes,id',
+                'id_cliente' => 'required|exists:clientes,id',
                 'productos' => 'required|array',
                 'productos.*.id' => 'required|exists:productos,id',
                 'productos.*.cantidad' => 'required|integer|min:1'
             ]);
 
             // Crear la venta
-            $venta = Venta::create([
-                'cliente_id' => $request->cliente_id,
-                'fecha' => now(),
-                'estado' => 'COMPLETADA',
-                'total' => 0
-            ]);
+            $venta = new Venta();
+            $venta->id_cliente = $request->id_cliente;
+            $venta->fecha = now();
+            $venta->total = 0;
+            $venta->id_empleado = auth()->id();
+            $venta->save();
 
             $total = 0;
 
             // Procesar cada producto
             foreach ($request->productos as $item) {
-                $producto = Producto::find($item['id']);
+                $producto = Producto::findOrFail($item['id']);
                 
                 // Verificar stock
                 if ($producto->stock_actual < $item['cantidad']) {
@@ -59,8 +65,8 @@ class VentasController extends Controller
                 
                 // Crear detalle de venta
                 DetalleVenta::create([
-                    'venta_id' => $venta->id,
-                    'producto_id' => $item['id'],
+                    'id_venta' => $venta->id,
+                    'id_producto' => $item['id'],
                     'cantidad' => $item['cantidad'],
                     'precio_unitario' => $producto->precio_venta,
                     'subtotal' => $subtotal
@@ -74,9 +80,11 @@ class VentasController extends Controller
             }
 
             // Actualizar el total de la venta
-            $venta->update(['total' => $total]);
+            $venta->total = $total;
+            $venta->save();
             
             DB::commit();
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Venta creada exitosamente',
@@ -92,59 +100,77 @@ class VentasController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(Venta $venta)
     {
         try {
-            $venta = Venta::with(['cliente', 'detalles.producto'])
-                ->findOrFail($id);
+            // Cargar las relaciones necesarias
+            $venta->load(['cliente', 'detalles.producto']);
+            
+            // Debug detallado
+            Log::info('ID de la venta:', ['id' => $venta->id]);
+            Log::info('Cliente:', ['cliente' => $venta->cliente]);
+            Log::info('Detalles:', ['detalles' => $venta->detalles]);
+            Log::info('Fecha:', ['fecha' => $venta->fecha]);
+            Log::info('Total:', ['total' => $venta->total]);
 
             return response()->json([
                 'success' => true,
-                'data' => $venta
+                'data' => [
+                    'id' => $venta->id,
+                    'cliente' => $venta->cliente,
+                    'fecha' => $venta->fecha,
+                    'total' => $venta->total,
+                    'detalles' => $venta->detalles->map(function($detalle) {
+                        return [
+                            'producto' => $detalle->producto,
+                            'cantidad' => $detalle->cantidad,
+                            'precio_unitario' => $detalle->precio_unitario,
+                            'subtotal' => $detalle->subtotal
+                        ];
+                    })
+                ]
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error en VentasController@show: ' . $e->getMessage());
-            
+            Log::error('Error en show:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Error al obtener la venta',
-                'error' => $e->getMessage()
+                'message' => 'Error al cargar los detalles de la venta: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    public function destroy($id)
+    public function destroy(Venta $venta)
     {
         try {
             DB::beginTransaction();
             
-            $venta = Venta::with('detalles')->find($id);
-            
-            // Restaurar stock de productos
-            foreach ($venta->detalles as $detalle) {
-                $producto = Producto::find($detalle->producto_id);
-                $producto->stock_actual += $detalle->cantidad;
-                $producto->save();
-            }
-            
-            // Eliminar la venta (los detalles se eliminarán automáticamente por la relación)
+            // Eliminar los detalles primero
+            $venta->detalles()->delete();
+            // Eliminar la venta
             $venta->delete();
             
             DB::commit();
-            return response()->json(['success' => true]);
             
+            return response()->json([
+                'success' => true,
+                'message' => 'Venta eliminada correctamente'
+            ]);
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['success' => false, 'error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar la venta'
+            ], 500);
         }
     }
 
-    public function generarPDF($id)
+    public function generarPDF(Venta $venta)
     {
-        $venta = Venta::with(['cliente', 'detalles.producto'])->findOrFail($id);
-        
+        $venta->load(['cliente', 'detalles.producto']);
         $pdf = PDF::loadView('facturas.factura', compact('venta'));
-        
-        return $pdf->download('factura-' . $venta->id . '.pdf');
+        return $pdf->stream('factura-' . $venta->id . '.pdf');
     }
 }
